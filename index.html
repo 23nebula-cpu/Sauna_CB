@@ -1,66 +1,188 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sauna České Budějovice – occupancy</title>
+<meta name="theme-color" content="#0f172a">
+<title>Sauna České Budějovice – live occupancy</title>
 <style>
-:root{--bg:#fff;--fg:#1a1a1a;--muted:#666;--line:#2a7de1;--grid:#0002;--card:#f4f5f7}
-@media(prefers-color-scheme:dark){:root{--bg:#161718;--fg:#eee;--muted:#9a9a9a;--line:#5aa2ff;--grid:#fff3;--card:#222426}}
-body{margin:0;padding:16px;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg)}
-main{max-width:900px;margin:0 auto}
-h1{font-size:1.2rem;margin:0 0 12px}
-.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px}
-.big{font-size:2.4rem;font-weight:700}
-.muted{color:var(--muted);font-size:.9rem}
-a{color:var(--line)}
-.g{stroke:var(--grid)}
-.t{fill:var(--muted);font-size:10px}
-.l{stroke:var(--line);fill:none;stroke-width:2}
-.a{fill:var(--line);opacity:.15}
-.p{fill:var(--line)}
+:root{--bg1:#eef3fb;--bg2:#ffffff;--card:#ffffffcc;--bd:#0f172a14;--fg:#0f172a;--mut:#64748b;--grid:#0f172a1a;--seg:#0f172a0d;--acc:#3b82f6;--sh:0 8px 30px #0f172a14}
+@media(prefers-color-scheme:dark){:root{--bg1:#0b1220;--bg2:#16223d;--card:#16213acc;--bd:#ffffff14;--fg:#e8eefc;--mut:#94a3b8;--grid:#ffffff1f;--seg:#ffffff14;--acc:#60a5fa;--sh:0 8px 30px #0006}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--fg);background:var(--bg1);background-image:radial-gradient(900px 500px at 50% -150px,var(--bg2),transparent);padding:20px 14px 40px}
+main{max-width:760px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px;margin:4px 4px 18px}
+.logo{width:46px;height:46px;border-radius:14px;background:var(--card);border:1px solid var(--bd);box-shadow:var(--sh);display:grid;place-items:center;font-size:24px}
+h1{font-size:1.15rem;margin:0;line-height:1.2}
+.sub{margin:2px 0 0;color:var(--mut);font-size:.85rem}
+.card{background:var(--card);border:1px solid var(--bd);box-shadow:var(--sh);border-radius:22px;padding:18px;margin-bottom:14px;backdrop-filter:blur(8px)}
+.hero{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ring{position:relative;width:150px;height:150px;flex:none}
+.ring svg{width:100%;height:100%}
+.rb{fill:none;stroke:var(--grid);stroke-width:14}
+.rf{fill:none;stroke-width:14;stroke-linecap:round;stroke-dasharray:402.12;stroke-dashoffset:402.12;stroke:var(--acc);transition:stroke-dashoffset 1s ease,stroke .5s}
+.rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#pct{font-size:2.3rem;font-weight:800;letter-spacing:-1px}
+.rl{font-size:.75rem;color:var(--mut);margin-top:-2px}
+.hinfo{flex:1;min-width:150px}
+.badge{display:inline-block;padding:6px 14px;border-radius:999px;font-weight:700;font-size:.95rem;background:var(--seg);color:var(--mut)}
+.people{margin-top:10px;font-size:1.05rem}
+.people b{font-size:1.5rem}
+.mut{color:var(--mut);font-size:.82rem;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--bd);box-shadow:var(--sh);border-radius:18px;padding:12px}
+.k{font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.v{font-size:1.4rem;font-weight:800;margin-top:2px}
+.s{font-size:.7rem;color:var(--mut);margin-top:1px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+h2{font-size:1rem;margin:0}
+.seg{display:inline-flex;background:var(--seg);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--mut);padding:6px 12px;border-radius:999px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+.seg button.on{background:var(--acc);color:#fff}
+.cw{position:relative;touch-action:pan-y}
+.cw svg{width:100%;height:auto;display:block}
+.gl{stroke:var(--grid);stroke-width:1}
+.tx{fill:var(--mut);font-size:10px}
+.tip{position:absolute;pointer-events:none;background:var(--fg);color:var(--bg1);padding:6px 10px;border-radius:10px;font-size:.8rem;white-space:nowrap;transform:translateX(-50%);opacity:0;transition:opacity .15s;line-height:1.3;text-align:center}
+.tip span{opacity:.7;font-size:.72rem}
+footer{color:var(--mut);font-size:.75rem;text-align:center;margin-top:18px;line-height:1.6}
+a{color:var(--acc)}
 </style></head>
 <body><main>
-<h1>Sauna České Budějovice – occupancy</h1>
-<div class="card"><div class="big" id="now">…</div><div class="muted" id="when">Loading</div></div>
-<div class="card"><div id="chart"></div>
-<div class="muted" style="margin-top:8px">Times in Prague time. Logged every 15 min.
-Source: <a href="https://www.kszcb.cz/sauna">kszcb.cz/sauna</a> ·
-<a href="https://raw.githubusercontent.com/23nebula-cpu/Sauna_CB/main/sauna_log.csv">CSV</a></div></div>
+<header><div class="logo">🧖</div><div><h1>Sauna České Budějovice</h1><p class="sub">Live occupancy</p></div></header>
+
+<section class="card hero">
+  <div class="ring"><svg viewBox="0 0 160 160"><circle class="rb" cx="80" cy="80" r="64"/><circle id="rf" class="rf" cx="80" cy="80" r="64" transform="rotate(-90 80 80)"/></svg>
+    <div class="rc"><div id="pct">–</div><div class="rl">occupied</div></div></div>
+  <div class="hinfo"><div id="badge" class="badge">Loading…</div><div id="people" class="people"></div><div id="upd" class="mut"></div></div>
+</section>
+
+<section class="stats">
+  <div class="stat"><div class="k">Peak</div><div class="v" id="s1">–</div><div class="s" id="s1s"></div></div>
+  <div class="stat"><div class="k">Average</div><div class="v" id="s2">–</div><div class="s" id="s2s"></div></div>
+  <div class="stat"><div class="k">Free spots</div><div class="v" id="s3">–</div><div class="s" id="s3s"></div></div>
+</section>
+
+<section class="card">
+  <div class="top"><h2>History</h2>
+    <div class="seg" id="seg"><button data-h="24" class="on">24 h</button><button data-h="72">3 days</button><button data-h="0">All</button></div></div>
+  <div class="cw" id="cw"><svg id="svg"></svg><div class="tip" id="tip"></div></div>
+</section>
+
+<footer>Times in Prague time · logged every 15 min<br>
+Source: <a href="https://www.kszcb.cz/sauna">kszcb.cz/sauna</a> · <a href="https://raw.githubusercontent.com/23nebula-cpu/Sauna_CB/main/sauna_log.csv">CSV data</a></footer>
 </main>
 <script>
 const CSV="https://raw.githubusercontent.com/23nebula-cpu/Sauna_CB/main/sauna_log.csv";
-const fmt=new Intl.DateTimeFormat("cs-CZ",{timeZone:"Europe/Prague",day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"});
 const $=id=>document.getElementById(id);
-window.onerror=(m,s,l)=>{$("when").textContent="Error: "+m+" (line "+l+")"};
-fetch(CSV+"?t="+Date.now()).then(r=>r.text()).then(txt=>{
-  const rows=txt.trim().split("\n").slice(1).map(l=>{
-    const [t,p,n,c]=l.split(",");
-    return {x:Date.parse(t+":00Z"),y:+p,n:+n,c:+c};
-  }).filter(r=>!isNaN(r.x));
-  if(!rows.length){$("when").textContent="No data yet";return}
-  const last=rows[rows.length-1];
-  $("now").textContent=last.y+"% ("+last.n+"/"+last.c+")";
-  $("when").textContent="Last reading: "+fmt.format(last.x);
-  draw(rows);
-}).catch(e=>{$("when").textContent="Could not load data: "+e});
-function draw(rows){
-  const W=360,H=260,L=36,R=10,T=10,B=28;
-  const x0=rows[0].x,x1=rows[rows.length-1].x,span=Math.max(x1-x0,1);
-  const X=v=>L+(v-x0)/span*(W-L-R);
-  const Y=v=>T+(100-v)/100*(H-T-B);
-  let s="";
-  for(let g=0;g<=100;g+=25){
-    s+='<line class="g" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(g)+'" y2="'+Y(g)+'"/>';
-    s+='<text class="t" x="'+(L-5)+'" y="'+(Y(g)+3)+'" text-anchor="end">'+g+'%</text>';
-  }
-  const anc=["start","middle","end"];
-  for(let i=0;i<3;i++){
-    const v=x0+span*i/2;
-    s+='<text class="t" x="'+X(v)+'" y="'+(H-8)+'" text-anchor="'+anc[i]+'">'+fmt.format(v)+'</text>';
-  }
-  const pts=rows.map(r=>X(r.x)+","+Y(r.y)).join(" ");
-  s+='<polygon class="a" points="'+X(x0)+","+Y(0)+" "+pts+" "+X(x1)+","+Y(0)+'"/>';
-  s+='<polyline class="l" points="'+pts+'"/>';
-  if(rows.length<=150) rows.forEach(r=>{s+='<circle class="p" cx="'+X(r.x)+'" cy="'+Y(r.y)+'" r="2.5"/>'});
-  $("chart").innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="100%">'+s+'</svg>';
+const tz="Europe/Prague";
+const fT=new Intl.DateTimeFormat("cs-CZ",{timeZone:tz,hour:"2-digit",minute:"2-digit"});
+const fDT=new Intl.DateTimeFormat("cs-CZ",{timeZone:tz,weekday:"short",day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"});
+const col=p=>p<40?"#22c55e":p<70?"#f59e0b":"#ef4444";
+const lab=p=>p<40?"Quiet":p<70?"Getting busy":"Busy";
+const VB={W:360,H:230,L:34,R:10,T:12,B:26};
+let rows=[],hours=24,cur=null;
+window.onerror=(m,s,l)=>{$("upd").textContent="Error: "+m+" (line "+l+")"};
+
+async function load(){
+  try{
+    const r=await fetch(CSV+"?t="+Date.now());
+    const lines=(await r.text()).trim().split("\n").slice(1);
+    rows=lines.map(l=>{const [t,p,n,c]=l.split(",");return{x:Date.parse(t+":00Z"),y:+p,n:+n,c:+c}}).filter(r=>!isNaN(r.x)&&!isNaN(r.y));
+    if(!rows.length){$("badge").textContent="No data yet";return}
+    hero();render();
+  }catch(e){$("badge").textContent="Could not load data";$("upd").textContent=String(e)}
 }
+
+function hero(){
+  const l=rows[rows.length-1],c=col(l.y);
+  $("pct").textContent=l.y+"%";
+  const f=$("rf");f.style.stroke=c;f.style.strokeDashoffset=402.12*(1-l.y/100);
+  const b=$("badge");b.textContent=lab(l.y);b.style.color=c;b.style.background=c+"26";
+  $("people").innerHTML="<b>"+l.n+"</b> of "+l.c+" people";
+  const m=Math.round((Date.now()-l.x)/60000);
+  $("upd").textContent=m<90?"Updated "+(m<1?"just now":m+" min ago")+" · "+fT.format(l.x):"Last reading "+fDT.format(l.x)+" · may be outdated";
+}
+
+function vis(){
+  const a=rows[rows.length-1].x;
+  return hours?rows.filter(r=>r.x>=a-hours*36e5):rows;
+}
+
+function render(){
+  const v=vis(),l=rows[rows.length-1];
+  const pk=v.reduce((a,b)=>b.y>a.y?b:a,v[0]);
+  const av=Math.round(v.reduce((s,r)=>s+r.y,0)/v.length);
+  $("s1").textContent=pk.y+"%";$("s1s").textContent=fDT.format(pk.x);
+  $("s2").textContent=av+"%";$("s2s").textContent=v.length+" readings";
+  $("s3").textContent=Math.max(l.c-l.n,0);$("s3s").textContent="of "+l.c;
+  chart(v);
+}
+
+function chart(v){
+  const {W,H,L,R,T,B}=VB;
+  const x0=v[0].x,x1=v[v.length-1].x,span=Math.max(x1-x0,6e4);
+  const X=t=>+(L+(t-x0)/span*(W-L-R)).toFixed(1);
+  const Y=p=>+(T+(100-p)/100*(H-T-B)).toFixed(1);
+  cur={v,X,x0,span};
+  let s='<defs><linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--acc);stop-opacity:.35"/><stop offset="1" style="stop-color:var(--acc);stop-opacity:0"/></linearGradient></defs>';
+  [0,25,50,75,100].forEach(g=>{
+    s+='<line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(g)+'" y2="'+Y(g)+'"/>';
+    s+='<text class="tx" x="'+(L-6)+'" y="'+(Y(g)+3)+'" text-anchor="end">'+g+'%</text>';
+  });
+  const short=span<=1.3e8,n=short?4:3;
+  for(let i=0;i<n;i++){
+    const t=x0+span*i/(n-1),a=i==0?"start":i==n-1?"end":"middle";
+    s+='<text class="tx" x="'+X(t)+'" y="'+(H-8)+'" text-anchor="'+a+'">'+(short?fT:fDT).format(t)+'</text>';
+  }
+  const segs=[];let c=[v[0]];
+  for(let i=1;i<v.length;i++){if(v[i].x-v[i-1].x>9e6){segs.push(c);c=[]}c.push(v[i])}
+  segs.push(c);
+  segs.forEach(g=>{
+    if(g.length==1){s+='<circle cx="'+X(g[0].x)+'" cy="'+Y(g[0].y)+'" r="3" style="fill:var(--acc)"/>';return}
+    let d="M"+X(g[0].x)+","+Y(g[0].y);
+    for(let i=1;i<g.length-1;i++){
+      const mx=((X(g[i].x)+X(g[i+1].x))/2).toFixed(1),my=((Y(g[i].y)+Y(g[i+1].y))/2).toFixed(1);
+      d+=" Q"+X(g[i].x)+","+Y(g[i].y)+" "+mx+","+my;
+    }
+    const e=g[g.length-1];
+    d+=" L"+X(e.x)+","+Y(e.y);
+    s+='<path d="'+d+' L'+X(e.x)+','+Y(0)+' L'+X(g[0].x)+','+Y(0)+' Z" fill="url(#gf)"/>';
+    s+='<path d="'+d+'" fill="none" style="stroke:var(--acc)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+  });
+  const e=v[v.length-1];
+  s+='<circle cx="'+X(e.x)+'" cy="'+Y(e.y)+'" r="4.5" style="fill:'+col(e.y)+'" stroke="#fff" stroke-width="1.5"/>';
+  s+='<g id="hv" style="display:none"><line id="hl" y1="'+T+'" y2="'+Y(0)+'" style="stroke:var(--mut)" stroke-dasharray="3 3"/><circle id="hc" r="5" style="fill:var(--acc)" stroke="#fff" stroke-width="2"/></g>';
+  const sv=$("svg");sv.setAttribute("viewBox","0 0 "+W+" "+H);sv.innerHTML=s;
+  cur.Y=Y;
+}
+
+function mv(e){
+  if(!cur)return;
+  const rc=$("svg").getBoundingClientRect();
+  const vx=(e.clientX-rc.left)/rc.width*VB.W;
+  const t=cur.x0+(vx-VB.L)/(VB.W-VB.L-VB.R)*cur.span;
+  let best=cur.v[0];
+  for(const r of cur.v)if(Math.abs(r.x-t)<Math.abs(best.x-t))best=r;
+  const px=cur.X(best.x),py=cur.Y(best.y);
+  $("hv").style.display="";
+  $("hl").setAttribute("x1",px);$("hl").setAttribute("x2",px);
+  $("hc").setAttribute("cx",px);$("hc").setAttribute("cy",py);
+  const tip=$("tip");
+  tip.innerHTML="<b>"+best.y+"%</b> · "+best.n+"/"+best.c+"<br><span>"+fDT.format(best.x)+"</span>";
+  tip.style.left=Math.min(Math.max(px/VB.W*rc.width,65),rc.width-65)+"px";
+  tip.style.top=Math.max(py/VB.H*rc.height-56,0)+"px";
+  tip.style.opacity=1;
+}
+function lv(){const h=$("hv");if(h)h.style.display="none";$("tip").style.opacity=0}
+const cw=$("cw");
+cw.addEventListener("pointermove",mv);
+cw.addEventListener("pointerdown",mv);
+cw.addEventListener("pointerleave",lv);
+
+$("seg").onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  hours=+b.dataset.h;
+  document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x===b));
+  if(rows.length)render();
+};
+load();setInterval(load,3e5);
 </script></body></html>
