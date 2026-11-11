@@ -1,71 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sauna České Budějovice – occupancy</title>
 <style>
-  :root { --bg:#fff; --fg:#1a1a1a; --muted:#666; --line:#2a7de1; --grid:#0001; --card:#f4f5f7; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#161718; --fg:#eee; --muted:#9a9a9a; --line:#5aa2ff; --grid:#fff2; --card:#222426; }
-  }
-  body { margin:0; padding:16px; font-family:system-ui,sans-serif; background:var(--bg); color:var(--fg); }
-  main { max-width:900px; margin:0 auto; }
-  h1 { font-size:1.2rem; margin:0 0 12px; }
-  .card { background:var(--card); border-radius:12px; padding:14px; margin-bottom:14px; }
-  .big { font-size:2.4rem; font-weight:700; }
-  .muted { color:var(--muted); font-size:.9rem; }
-  .chart { position:relative; height:320px; }
-  a { color:var(--line); }
-</style>
-</head>
-<body>
-<main>
-  <h1>Sauna České Budějovice – occupancy</h1>
-  <div class="card">
-    <div class="big" id="now">…</div>
-    <div class="muted" id="when">Loading</div>
-  </div>
-  <div class="card">
-    <div class="chart"><canvas id="c"></canvas></div>
-    <div class="muted" style="margin-top:8px">Times in Prague time. Logged every 15 min.
-      Source: <a href="https://www.kszcb.cz/sauna">kszcb.cz/sauna</a> ·
-      <a href="https://raw.githubusercontent.com/23nebula-cpu/Sauna_CB/main/sauna_log.csv">CSV</a></div>
-  </div>
+:root{--bg:#fff;--fg:#1a1a1a;--muted:#666;--line:#2a7de1;--grid:#0002;--card:#f4f5f7}
+@media(prefers-color-scheme:dark){:root{--bg:#161718;--fg:#eee;--muted:#9a9a9a;--line:#5aa2ff;--grid:#fff3;--card:#222426}}
+body{margin:0;padding:16px;font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+main{max-width:900px;margin:0 auto}
+h1{font-size:1.2rem;margin:0 0 12px}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px}
+.big{font-size:2.4rem;font-weight:700}
+.muted{color:var(--muted);font-size:.9rem}
+a{color:var(--line)}
+.g{stroke:var(--grid)}
+.t{fill:var(--muted);font-size:10px}
+.l{stroke:var(--line);fill:none;stroke-width:2}
+.a{fill:var(--line);opacity:.15}
+.p{fill:var(--line)}
+</style></head>
+<body><main>
+<h1>Sauna České Budějovice – occupancy</h1>
+<div class="card"><div class="big" id="now">…</div><div class="muted" id="when">Loading</div></div>
+<div class="card"><div id="chart"></div>
+<div class="muted" style="margin-top:8px">Times in Prague time. Logged every 15 min.
+Source: <a href="https://www.kszcb.cz/sauna">kszcb.cz/sauna</a> ·
+<a href="https://raw.githubusercontent.com/23nebula-cpu/Sauna_CB/main/sauna_log.csv">CSV</a></div></div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-const CSV = "https://raw.githubusercontent.com/23nebula-cpu/Sauna_CB/main/sauna_log.csv";
-const fmt = new Intl.DateTimeFormat("cs-CZ", {
-  timeZone: "Europe/Prague", weekday: "short", day: "numeric", month: "numeric",
-  hour: "2-digit", minute: "2-digit"
-});
-
-async function main() {
-  const res = await fetch(CSV + "?t=" + Date.now());
-  const lines = (await res.text()).trim().split("\n").slice(1);
-  const rows = lines.map(l => {
-    const [t, p, n, c] = l.split(",");
-    return { x: Date.parse(t + ":00Z"), y: +p, n: +n, c: +c };
-  }).filter(r => !isNaN(r.x));
-  if (!rows.length) { document.getElementById("when").textContent = "No data yet"; return; }
-
-  const last = rows[rows.length - 1];
-  document.getElementById("now").textContent = last.y + "% (" + last.n + "/" + last.c + ")";
-  document.getElementById("when").textContent = "Last reading: " + fmt.format(last.x);
-
-  const css = getComputedStyle(document.documentElement);
-  const line = css.getPropertyValue("--line").trim();
-  const grid = css.getPropertyValue("--grid").trim();
-  const muted = css.getPropertyValue("--muted").trim();
-
-  new Chart(document.getElementById("c"), {
-    type: "line",
-    data: { datasets: [{ data: rows, borderColor: line, backgroundColor: line + "33",
-      fill: true, pointRadius: 2, borderWidth: 2, tension: 0.2 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false, parsing: false,
-      plugins: { legend: { display: false },
-        tooltip: { callbacks: {
-          title: i => fmt.format(i[0].raw.x),
-          label: i =
+const CSV="https://raw.githubusercontent.com/23nebula-cpu/Sauna_CB/main/sauna_log.csv";
+const fmt=new Intl.DateTimeFormat("cs-CZ",{timeZone:"Europe/Prague",day:"numeric",month:"numeric",hour:"2-digit",minute:"2-digit"});
+const $=id=>document.getElementById(id);
+window.onerror=(m,s,l)=>{$("when").textContent="Error: "+m+" (line "+l+")"};
+fetch(CSV+"?t="+Date.now()).then(r=>r.text()).then(txt=>{
+  const rows=txt.trim().split("\n").slice(1).map(l=>{
+    const [t,p,n,c]=l.split(",");
+    return {x:Date.parse(t+":00Z"),y:+p,n:+n,c:+c};
+  }).filter(r=>!isNaN(r.x));
+  if(!rows.length){$("when").textContent="No data yet";return}
+  const last=rows[rows.length-1];
+  $("now").textContent=last.y+"% ("+last.n+"/"+last.c+")";
+  $("when").textContent="Last reading: "+fmt.format(last.x);
+  draw(rows);
+}).catch(e=>{$("when").textContent="Could not load data: "+e});
+function draw(rows){
+  const W=360,H=260,L=36,R=10,T=10,B=28;
+  const x0=rows[0].x,x1=rows[rows.length-1].x,span=Math.max(x1-x0,1);
+  const X=v=>L+(v-x0)/span*(W-L-R);
+  const Y=v=>T+(100-v)/100*(H-T-B);
+  let s="";
+  for(let g=0;g<=100;g+=25){
+    s+='<line class="g" x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(g)+'" y2="'+Y(g)+'"/>';
+    s+='<text class="t" x="'+(L-5)+'" y="'+(Y(g)+3)+'" text-anchor="end">'+g+'%</text>';
+  }
+  const anc=["start","middle","end"];
+  for(let i=0;i<3;i++){
+    const v=x0+span*i/2;
+    s+='<text class="t" x="'+X(v)+'" y="'+(H-8)+'" text-anchor="'+anc[i]+'">'+fmt.format(v)+'</text>';
+  }
+  const pts=rows.map(r=>X(r.x)+","+Y(r.y)).join(" ");
+  s+='<polygon class="a" points="'+X(x0)+","+Y(0)+" "+pts+" "+X(x1)+","+Y(0)+'"/>';
+  s+='<polyline class="l" points="'+pts+'"/>';
+  if(rows.length<=150) rows.forEach(r=>{s+='<circle class="p" cx="'+X(r.x)+'" cy="'+Y(r.y)+'" r="2.5"/>'});
+  $("chart").innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="100%">'+s+'</svg>';
+}
+</script></body></html>
