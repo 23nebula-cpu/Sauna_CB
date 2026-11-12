@@ -3,9 +3,6 @@
 
   python sauna.py log    # fetch once, append to sauna_log.csv
   python sauna.py plot   # make sauna_log.png from the CSV
-
-Cron (every 30 min):
-  */30 * * * * /usr/bin/python3 /path/to/sauna.py log
 """
 import csv, re, sys, urllib.request
 from datetime import datetime
@@ -23,12 +20,16 @@ def fetch():
     text = re.sub(r"\s+", " ", text)
     m = re.search(r"(\d+)\s*%\s*Obsazenost\s*(\d+)\s*/\s*(\d+)", text)
     if not m:
-        raise RuntimeError("Occupancy not found in page (layout changed or loaded by JS)")
+        raise RuntimeError("Occupancy not found (closed, or page layout changed)")
     return int(m[1]), int(m[2]), int(m[3])
 
 
 def log():
-    pct, now, cap = fetch()
+    try:
+        pct, now, cap = fetch()
+    except Exception as e:
+        print("Skipped:", e)
+        return
     new = not CSV.exists()
     with CSV.open("a", newline="") as f:
         w = csv.writer(f)
