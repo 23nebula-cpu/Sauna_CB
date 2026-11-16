@@ -2,7 +2,7 @@ name: Sauna occupancy
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -15,6 +15,7 @@ concurrency:
 jobs:
   log:
     runs-on: ubuntu-latest
+    timeout-minutes: 345
     steps:
       - uses: actions/checkout@v4
 
@@ -25,16 +26,17 @@ jobs:
       - name: Install matplotlib
         run: pip install matplotlib
 
-      - name: Log occupancy
-        run: python sauna.py log
-
-      - name: Update graph
-        run: python sauna.py plot
-
-      - name: Commit results
+      - name: Sample every 15 minutes
         run: |
           git config user.name "sauna-bot"
           git config user.email "sauna-bot@users.noreply.github.com"
-          git add sauna_log.csv sauna_log.png
-          git diff --staged --quiet || git commit -m "Sauna log $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push
+          end=$((SECONDS + 5*3600 + 15*60))
+          while [ $SECONDS -lt $end ]; do
+            python sauna.py log || true
+            python sauna.py plot || true
+            git add sauna_log.csv sauna_log.png || true
+            git diff --staged --quiet || git commit -m "Sauna log $(date -u +%Y-%m-%dT%H:%MZ)"
+            git pull --rebase -q || true
+            git push -q || true
+            sleep 900
+          done
